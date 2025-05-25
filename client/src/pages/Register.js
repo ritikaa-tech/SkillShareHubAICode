@@ -51,7 +51,7 @@ const Register = () => {
         role: formData.role,
       });
       console.log("Before regist", formData);
-      const res = await axios.post('http://localhost:5001/api/users/register', {
+      const res = await axios.post('https://skillsharehubbackend.onrender.com/api/users/register', {
         username: formData.username,
         email: formData.email,
         password: formData.password,
