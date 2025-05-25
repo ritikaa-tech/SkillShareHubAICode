@@ -1,60 +1,36 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { ThemeProvider, createTheme } from '@mui/material/styles';
-import CssBaseline from '@mui/material/CssBaseline';
-
-// Components
-import Navbar from './components/Navbar';
-import Home from './pages/Home';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
-import PrivateRoute from './components/PrivateRoute';
-import Admin from './pages/Admin';
-import RequireRole from './components/RequireRole';
-
-// Create theme
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: '#1976d2',
-    },
-    secondary: {
-      main: '#dc004e',
-    },
-  },
-});
+//import { AuthProvider } from './context/AuthContext'; // adjust the path
+import ProtectedRoute from './components/ProtectedRoutes'; // adjust the path
+import CourseDetail from './pages/CourseDetail';
 
 function App() {
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
+    
       <Router>
-        <Navbar />
         <Routes>
-          <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/courses/:id" element={<CourseDetail />} />
+          {/* Protected route */}
           <Route
             path="/dashboard"
             element={
-              <PrivateRoute>
+              <ProtectedRoute>
                 <Dashboard />
-              </PrivateRoute>
+              </ProtectedRoute>
             }
           />
-          <Route
-            path="/admin"
-            element={
-              <RequireRole roles={['admin']}>
-                <Admin />
-              </RequireRole>
-            }
-          />
+
+          {/* Fallback */}
+          <Route path="*" element={<Navigate to="/login" />} />
         </Routes>
       </Router>
-    </ThemeProvider>
+   
   );
 }
 
-export default App; 
+export default App;

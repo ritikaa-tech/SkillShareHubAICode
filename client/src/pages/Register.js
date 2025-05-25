@@ -50,8 +50,8 @@ const Register = () => {
         email: formData.email,
         role: formData.role,
       });
-
-      const res = await axios.post('/auth/register', {
+      console.log("Before regist", formData);
+      const res = await axios.post('http://localhost:5001/api/users/register', {
         username: formData.username,
         email: formData.email,
         password: formData.password,
@@ -60,7 +60,7 @@ const Register = () => {
 
       console.log('Registration response:', res.data);
       login(res.data.user, res.data.token);
-      navigate('/dashboard');
+      navigate('/login');
     } catch (err) {
       console.error('Registration error details:', {
         message: err.message,

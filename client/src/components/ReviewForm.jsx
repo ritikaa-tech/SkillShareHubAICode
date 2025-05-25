@@ -5,11 +5,12 @@ import { FaStar } from 'react-icons/fa';
 const ReviewForm = ({ courseId, userId, onReviewSubmit }) => {
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState('');
-
+ 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('/api/reviews', { userId, courseId, rating, comment });
+      console.log('Submitting review:', { userId, courseId, rating, comment });
+      await axios.post('/api/reviews/', { userId, courseId, rating, comment });
       onReviewSubmit();
       setRating(0);
       setComment('');

@@ -1,101 +1,77 @@
 import React, { useState } from 'react';
-import { Container, Paper, Typography, TextField, Button, Box } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import api from '../utils/api';
+import { useAuth } from '../context/AuthContext'; // Make sure the path is correct
 
-/*const Login = () => {
-  const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-  });
+function Login() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const navigate = useNavigate();
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-  };
+  const { login } = useAuth(); // ⬅️ get the login function from context
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-
+    console.log("Submitting login with password:", `"${password}"`, "Length:", password.length);
     try {
-      console.log('Attempting login with:', { email: formData.email });
-      const response = await api.post('/auth/login', formData);
-      console.log('Login response:', response.data);
-      
-      // Store the token in localStorage
-      localStorage.setItem('token', response.data.token);
-      
-      // Redirect to dashboard
-      navigate('/dashboard');
-    } catch (error) {
-      console.error('Login error:', error);
-      setError(error.message || 'Failed to login. Please try again.');
+      const response = await fetch('http://localhost:5001/api/users/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setSuccess('Login successful!');
+        setError('');
+
+        // Update AuthContext
+        console.log('Login data:', data);
+        login(data.user, data.token); // ⬅️ use context to set token and user
+
+        console.log('Login success:', data);
+        navigate('/dashboard');
+      } else {
+        setError(data.message || 'Login failed');
+        setSuccess('');
+      }
+    } catch (err) {
+      setError('Server error, please try again later.');
+      setSuccess('');
+      console.error(err);
     }
   };
 
   return (
-    <Container maxWidth="sm">
-      <Box sx={{ mt: 8 }}>
-        <Paper elevation={3} sx={{ p: 4 }}>
-          <Typography variant="h4" component="h1" gutterBottom align="center">
-            Login
-          </Typography>
-          {error && (
-            <Typography color="error" align="center" sx={{ mb: 2 }}>
-              {error}
-            </Typography>
-          )}
-          <form onSubmit={handleSubmit}>
-            <TextField
-              fullWidth
-              label="Email"
-              name="email"
-              type="email"
-              value={formData.email}
-              onChange={handleChange}
-              margin="normal"
-              required
-            />
-            <TextField
-              fullWidth
-              label="Password"
-              name="password"
-              type="password"
-              value={formData.password}
-              onChange={handleChange}
-              margin="normal"
-              required
-            />
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              color="primary"
-              sx={{ mt: 3 }}
-            >
-              Login
-            </Button>
-          </form>
-        </Paper>
-      </Box>
-    </Container>
+    <div>
+      <h2>Login</h2>
+      {error && <p style={{ color: 'red' }}>{error}</p>}
+      {success && <p style={{ color: 'green' }}>{success}</p>}
+      <form onSubmit={handleSubmit}>
+        <input 
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="Email"
+          required
+        />
+        <br />
+        <input 
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="Password"
+          required
+        />
+        <br />
+        <button type="submit">Login</button>
+      </form>
+    </div>
   );
-};
+}
 
-export default Login; */
-// Somewhere early in the app (e.g. App.js or before a dashboard loads)
-useEffect(() => {
-  const mockUser = {
-    _id: "123456789",
-    name: "Mock Instructor",
-    email: "instructor@demo.com",
-    role: "instructor",
-    token: "fake-jwt-token"
-  };
-  localStorage.setItem("user", JSON.stringify(mockUser));
-}, []);
+export default Login;
