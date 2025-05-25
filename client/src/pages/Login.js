@@ -15,7 +15,7 @@ function Login() {
     e.preventDefault();
     console.log("Submitting login with password:", `"${password}"`, "Length:", password.length);
     try {
-      const response = await fetch('http://localhost:5001/api/users/login', {
+      const response = await fetch('https://skillsharehubbackend.onrender.com/api/users/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
