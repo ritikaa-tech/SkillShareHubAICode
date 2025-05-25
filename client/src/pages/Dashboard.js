@@ -32,7 +32,7 @@ const Dashboard = () => {
 
   const fetchCourses = async () => {
     try {
-      const res = await axios.get('http://localhost:5001/api/courses', {
+      const res = await axios.get('https://skillsharehubbackend.onrender.com/api/courses', {
         headers: { Authorization: `Bearer ${token}` },
       });
       setCourses(res.data);
