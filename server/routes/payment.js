@@ -1,68 +1,67 @@
+// routes/payments.js
+const Razorpay = require('razorpay');
 const express = require('express');
+const crypto = require('crypto');
+const Order = require('../models/order'); // Adjust the path if needed
 const router = express.Router();
-const Stripe = require('stripe');
-const stripe = Stripe(process.env.STRIPE_SECRET_KEY); // use .env for safety
+console.log("process.env.RAZORPAY_KEY_ID", process.env.RAZORPAY_KEY_ID);
+const razorpay = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID,
+  key_secret: process.env.RAZORPAY_SECRET,
+});
 
-// Create Stripe checkout session
-router.post('/create-checkout-session', async (req, res) => {
-  const { courseId, courseTitle, price, userId } = req.body;
+ router.post('/create-order', async (req, res) => {
+  const { amount, userId, courseId } = req.body;
+  console.log("Creating order with amount:", amount, "userId:", userId, "courseId:", courseId);
+  const options = {
+    amount: amount * 100, // amount in paise
+    currency: 'INR',
+    receipt: `rcpt_${userId}_${courseId}`,
+  };
 
   try {
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      line_items: [
-        {
-          price_data: {
-            currency: 'usd',
-            product_data: {
-              name: courseTitle,
-            },
-            unit_amount: price * 100, // $10.00 -> 1000
-          },
-          quantity: 1,
-        },
-      ],
-      mode: 'payment',
-      success_url: `${process.env.CLIENT_URL}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.CLIENT_URL}/payment-cancel`,
-      metadata: {
-        courseId,
-        userId,
-      },
+    razorpay.orders.create(options, async (err, order) => {
+      if (err) {
+        console.error("Razorpay order creation error:", err);
+        return res.status(500).json({ success: false, error: "Failed to create order" });
+      }
+
+      // Save order to DB
+      const newOrder = new Order({
+        orderid: order.id,
+        amount: order.amount,
+        currency: order.currency,
+        receipt: order.receipt,
+        status: 'PENDING',
+        userId: req.user?._id || userId,
+        courseId: courseId,
+      });
+
+      await newOrder.save();
+
+      res.json({ success: true, order });
     });
-
-    res.json({ url: session.url });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Stripe session creation failed' });
+  } catch (error) {
+    console.error("Unexpected error:", error);
+    res.status(500).json({ success: false, error: error.message });
   }
 });
 
-// Webhook to confirm payment and enroll user
-router.post('/webhook', express.raw({ type: 'application/json' }), (req, res) => {
-  const sig = req.headers['stripe-signature'];
 
-  let event;
-  try {
-    event = stripe.webhooks.constructEvent(
-      req.body,
-      sig,
-      process.env.STRIPE_WEBHOOK_SECRET
-    );
-  } catch (err) {
-    console.error('Webhook error:', err.message);
-    return res.status(400).send(`Webhook Error: ${err.message}`);
+router.post('/verify', (req, res) => {
+  const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+
+  const sign = razorpay_order_id + "|" + razorpay_payment_id;
+  const expectedSign = crypto
+    .createHmac('sha256', process.env.RAZORPAY_SECRET)
+    .update(sign.toString())
+    .digest('hex');
+
+  if (expectedSign === razorpay_signature) {
+    // Update your DB to mark course as purchased by user
+    res.json({ success: true, message: "Payment verified" });
+  } else {
+    res.status(400).json({ success: false, message: "Invalid signature" });
   }
-
-  if (event.type === 'checkout.session.completed') {
-    const session = event.data.object;
-    const { courseId, userId } = session.metadata;
-
-    // TODO: Enroll user in course, save to DB
-    console.log(`✅ Enroll user ${userId} in course ${courseId}`);
-  }
-
-  res.status(200).send('Received webhook');
 });
-
 module.exports = router;

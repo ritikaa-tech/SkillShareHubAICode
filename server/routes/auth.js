@@ -4,6 +4,35 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { body, validationResult } = require('express-validator');
 const User = require('../models/User');
+//const express = require('express');
+//const bcrypt = require('bcryptjs');
+//const jwt = require('jsonwebtoken');
+//const User = require('../models/User');
+
+//const router = express.Router();
+
+// Login Route
+router.post('/login', async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    const user = await User.findOne({ email });
+    if (!user) return res.status(400).json({ msg: 'Invalid credentials' });
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) return res.status(400).json({ msg: 'Invalid credentials' });
+
+    const token = jwt.sign({ userId: user._id }, 'your_jwt_secret', { expiresIn: '1h' });
+
+    res.json({ token, user: { id: user._id, email: user.email } });
+  } catch (err) {
+    console.error('Login error:', err.message);
+    res.status(500).send('Server error');
+  }
+});
+
+module.exports = router;
+
 
 // @route   POST api/auth/register
 // @desc    Register a user

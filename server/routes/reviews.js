@@ -1,35 +1,22 @@
+// routes/reviews.js
 const express = require('express');
 const router = express.Router();
-const Review = require('../models/Review');
+const Review = require('../models/Review'); // Your Mongoose model
 
-// Create or update review
 router.post('/', async (req, res) => {
   const { userId, courseId, rating, comment } = req.body;
 
-  try {
-    const existing = await Review.findOne({ userId, courseId });
-    if (existing) {
-      existing.rating = rating;
-      existing.comment = comment;
-      await existing.save();
-      return res.json({ message: 'Review updated', review: existing });
-    }
-
-    const newReview = new Review({ userId, courseId, rating, comment });
-    await newReview.save();
-    res.status(201).json({ message: 'Review created', review: newReview });
-  } catch (err) {
-    res.status(400).json({ error: err.message });
+  if (!userId || !courseId || !rating) {
+    return res.status(400).json({ message: 'Missing required fields' });
   }
-});
 
-// Get all reviews for a course
-router.get('/:courseId', async (req, res) => {
   try {
-    const reviews = await Review.find({ courseId: req.params.courseId }).populate('userId', 'name');
-    res.json(reviews);
+    const review = new Review({ userId, courseId, rating, comment });
+    await review.save();
+    res.status(201).json({ message: 'Review submitted successfully', review });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('Review submission error:', err);
+    res.status(500).json({ message: 'Server error' });
   }
 });
 
