@@ -2,6 +2,55 @@ const express = require('express');
 const router = express.Router();
 const Course = require('../models/course');
 const authMiddleware = require('../middleware/auth');
+
+// Add Video
+router.put('/:id/videos', authMiddleware, async (req, res) => {
+  const course = await Course.findById(req.params.id);
+  course.videos.push(req.body);
+  await course.save();
+  res.json(course);
+});
+
+// Add Resource
+router.put('/:id/resources',authMiddleware, async (req, res) => {
+  const course = await Course.findById(req.params.id);
+  course.resources.push(req.body);
+  await course.save();
+  res.json(course);
+});
+
+// Add Quiz
+router.put('/:id/quizzes',authMiddleware, async (req, res) => {
+  const course = await Course.findById(req.params.id);
+  course.quizzes.push(req.body);
+  await course.save();
+  res.json(course);
+});
+
+// Delete Video
+router.delete('/:id/videos/:index', authMiddleware, async (req, res) => {
+  const course = await Course.findById(req.params.id);
+  course.videos.splice(req.params.index, 1);
+  await course.save();
+  res.json(course);
+});
+
+// Delete Resource
+router.delete('/:id/resources/:index', authMiddleware, async (req, res) => {
+  const course = await Course.findById(req.params.id);
+  course.resources.splice(req.params.index, 1);
+  await course.save();
+  res.json(course);
+});
+
+// Delete Quiz
+router.delete('/:id/quizzes/:index', authMiddleware, async (req, res) => {
+  const course = await Course.findById(req.params.id);
+  course.quizzes.splice(req.params.index, 1);
+  await course.save();
+  res.json(course);
+});
+
 // ✅ GET all courses
 router.get('/', authMiddleware, async (req, res) => {
   try {
@@ -66,53 +115,6 @@ router.delete('/:id',authMiddleware, async (req, res) => {
   }
 });
 
-// Add Video
-router.put('/:id/videos', authMiddleware, async (req, res) => {
-  const course = await Course.findById(req.params.id);
-  course.videos.push(req.body);
-  await course.save();
-  res.json(course);
-});
-
-// Add Resource
-router.put('/:id/resources',authMiddleware, async (req, res) => {
-  const course = await Course.findById(req.params.id);
-  course.resources.push(req.body);
-  await course.save();
-  res.json(course);
-});
-
-// Add Quiz
-router.put('/:id/quizzes',authMiddleware, async (req, res) => {
-  const course = await Course.findById(req.params.id);
-  course.quizzes.push(req.body);
-  await course.save();
-  res.json(course);
-});
-
-// Delete Video
-router.delete('/:id/videos/:index', authMiddleware, async (req, res) => {
-  const course = await Course.findById(req.params.id);
-  course.videos.splice(req.params.index, 1);
-  await course.save();
-  res.json(course);
-});
-
-// Delete Resource
-router.delete('/:id/resources/:index', authMiddleware, async (req, res) => {
-  const course = await Course.findById(req.params.id);
-  course.resources.splice(req.params.index, 1);
-  await course.save();
-  res.json(course);
-});
-
-// Delete Quiz
-router.delete('/:id/quizzes/:index', authMiddleware, async (req, res) => {
-  const course = await Course.findById(req.params.id);
-  course.quizzes.splice(req.params.index, 1);
-  await course.save();
-  res.json(course);
-});
 
 
 
