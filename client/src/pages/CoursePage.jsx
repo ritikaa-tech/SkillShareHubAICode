@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import ReviewForm from '../components/ReviewForm';
- // import ReviewsList from '../components/ReviewsList';
+import ReviewsList from '../components/ReviewsList';
 
 const CoursePage = ({ courseId, userId }) => {
   const [reviews, setReviews] = useState([]);
