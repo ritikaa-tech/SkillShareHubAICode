@@ -67,7 +67,7 @@ const Dashboard = () => {
   const handleDeleteClick = async (e, id) => {
     e.stopPropagation();
     try {
-      await axios.delete(`http://localhost:5001/api/courses/${id}`, {
+      await axios.delete(`https://skillsharehubbackend.onrender.com/api/courses/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       fetchCourses();
@@ -94,11 +94,11 @@ const Dashboard = () => {
 
     try {
       if (editingCourseId) {
-        await axios.put(`http://localhost:5001/api/courses/${editingCourseId}`, courseData, {
+        await axios.put(`https://skillsharehubbackend.onrender.com/api/courses/${editingCourseId}`, courseData, {
           headers: { Authorization: `Bearer ${token}` },
         });
       } else {
-        await axios.post('http://localhost:5001/api/courses', courseData, {
+        await axios.post('https://skillsharehubbackend.onrender.com/api/courses', courseData, {
           headers: { Authorization: `Bearer ${token}` },
         });
       }
@@ -127,7 +127,7 @@ const Dashboard = () => {
       image: "https://your-logo-url.com/logo.png", // Optional
       order_id: "", // Replace with order ID from your backend
       handler: async function (response) {
-        const data = await axios.post('http://localhost:5001/api/payment/verify', {
+        const data = await axios.post('https://skillsharehubbackend.onrender.com/api/payment/verify', {
           razorpay_order_id: response.razorpay_order_id,
           razorpay_payment_id: response.razorpay_payment_id,
           razorpay_signature: response.razorpay_signature,
