@@ -32,7 +32,7 @@ const CourseDetail = () => {
   useEffect(() => {
     const fetchCourse = async () => {
       if (token) {
-        const res = await axios.get(`http://localhost:5001/api/courses/${id}`, {
+        const res = await axios.get(`https://skillsharehubbackend.onrender.com/api/courses/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -47,7 +47,7 @@ const CourseDetail = () => {
   useEffect(() => {
     const fetchReviews = async () => {
       try {
-        const res = await axios.get(`http://localhost:5001/api/reviews/${id}`);
+        const res = await axios.get(`https://skillsharehubbackend.onrender.com/api/reviews/${id}`);
         setReviews(res.data);
       } catch (err) {
         console.error('Error fetching reviews:', err);
@@ -58,7 +58,7 @@ const CourseDetail = () => {
 
   const handleReviewSubmit = async () => {
     try {
-      const res = await axios.get(`http://localhost:5001/api/reviews/${id}`);
+      const res = await axios.get(`https://skillsharehubbackend.onrender.com/api/reviews/${id}`);
       setReviews(res.data);
     } catch (err) {
       console.error('Error refreshing reviews:', err);
@@ -92,7 +92,7 @@ const CourseDetail = () => {
       }
 
       const updated = await axios.put(
-        `http://localhost:5001/api/courses/${id}/${field}`,
+        `https://skillsharehubbackend.onrender.com/api/courses/${id}/${field}`,
         data,
         { headers: { Authorization: `Bearer ${token}` } }
       );
