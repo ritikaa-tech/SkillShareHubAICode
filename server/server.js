@@ -41,7 +41,9 @@ mongoose.connect(process.env.MONGODB_URI, {
 }).catch((err) => {
   console.error('MongoDB connection error:', err);
 });
-
+app.get('/display', (req, res) => {
+  res.send('Display route is working!');
+});
 
 
 // Start server
