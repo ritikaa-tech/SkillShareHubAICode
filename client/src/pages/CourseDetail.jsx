@@ -6,7 +6,7 @@ import isEqual from 'lodash.isequal';
 import Task from './Task';
 import CoursePage from './CoursePage';
 import ReviewForm from '../components/ReviewForm';
-import ReviewsList from '../components/ReviewsList';
+// import ReviewsList from '../components/ReviewsList';
 import { useParams } from 'react-router-dom';
 
 import {
@@ -194,7 +194,7 @@ const CourseDetail = () => {
         )}
 
         {/* Reviews List */}
-        <ReviewsList reviews={reviews} />
+{/*       <ReviewsList reviews={reviews} /> */}
       </Box>
     </Container>
   );
