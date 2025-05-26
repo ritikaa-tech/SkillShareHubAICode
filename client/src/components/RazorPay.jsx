@@ -20,7 +20,7 @@ const RazorpayPayment = () => {
     }
 
     // Replace with your backend API to create an order
-    const response = await fetch("/api/create-order", {
+    const response = await fetch("https://skillsharehubbackend.onrender.com/api/payments/create-order", {
       method: "POST",
     });
     const orderData = await response.json();
