@@ -1,0 +1,31 @@
+/* Register.css */
+.register-container {
+  margin-top: 64px;
+  display: flex;
+  justify-content: center;
+}
+
+.register-paper {
+  padding: 32px;
+  width: 100%;
+  max-width: 500px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  background-color: #fff;
+}
+
+.register-title {
+  text-align: center;
+  margin-bottom: 20px;
+  font-weight: 600;
+  font-size: 28px;
+  color: #2c3e50;
+}
+
+.register-form .MuiTextField-root {
+  margin-bottom: 16px;
+}
+
+.register-form .MuiButton-root {
+  margin-top: 24px;
+}
