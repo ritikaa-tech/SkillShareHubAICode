@@ -6,6 +6,7 @@ import Dashboard from './pages/Dashboard';
 //import { AuthProvider } from './context/AuthContext'; // adjust the path
 import ProtectedRoute from './components/ProtectedRoutes'; // adjust the path
 import CourseDetail from './pages/CourseDetail';
+import AdminDashboard from './pages/AdminDashboard';
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/courses/:id" element={<CourseDetail />} />
+          <Rout path="/admin" element={<AdminDashboard />} />
           {/* Protected route */}
           <Route
             path="/dashboard"
