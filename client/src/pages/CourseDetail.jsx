@@ -29,16 +29,25 @@ const CourseDetail = () => {
   const [quiz, setQuiz] = useState({ question: '', options: '', answer: '' });
   const [reviews, setReviews] = useState([]);
 
+  // Axios helper with auth
+  const axiosAuth = axios.create({
+    baseURL: 'https://skillsharehubbackend.onrender.com/api',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
   useEffect(() => {
     const fetchCourse = async () => {
-      if (token) {
-        const res = await axios.get(`https://skillsharehubbackend.onrender.com/api/courses/${id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        if (!course || !isEqual(course, res.data)) {
-          setCourse(res.data);
+      try {
+        if (token) {
+          const res = await axiosAuth.get(`/courses/${id}`);
+          if (!course || !isEqual(course, res.data)) {
+            setCourse(res.data);
+          }
         }
+      } catch (err) {
+        console.error('Error fetching course:', err);
       }
     };
     fetchCourse();
@@ -91,18 +100,14 @@ const CourseDetail = () => {
           return;
       }
 
-      const updated = await axios.put(
-        `https://skillsharehubbackend.onrender.com/api/courses/${id}/${field}`,
-        data,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const updated = await axiosAuth.put(`/courses/${id}/${field}`, data);
       setCourse(updated.data);
 
       if (field === 'videos') setVideo({ title: '', url: '' });
       if (field === 'resources') setResource({ name: '', link: '' });
       if (field === 'quizzes') setQuiz({ question: '', options: '', answer: '' });
     } catch (err) {
-      console.error(err);
+      console.error('Error adding field:', err.response?.data || err.message);
     }
   };
 
@@ -130,7 +135,7 @@ const CourseDetail = () => {
 
       {showTask && (
         <>
-         {/* Add Video */}
+          {/* Add Video */}
           <Box mt={4}>
             <Typography variant="h6">Add Video</Typography>
             <TextField label="Title" value={video.title} onChange={(e) => setVideo({ ...video, title: e.target.value })} fullWidth />
@@ -170,7 +175,6 @@ const CourseDetail = () => {
               Add Quiz
             </Button>
           </Box>
-
         </>
       )}
 
@@ -195,7 +199,7 @@ const CourseDetail = () => {
         )}
 
         {/* Reviews List */}
-{/*       <ReviewsList reviews={reviews} /> */}
+        {/* <ReviewsList reviews={reviews} /> */}
       </Box>
     </Container>
   );
