@@ -130,50 +130,46 @@ const CourseDetail = () => {
 
       {showTask && (
         <>
-          // Add Video
-router.put('/:id/videos', authMiddleware, async (req, res) => {
-  try {
-    const course = await Course.findById(req.params.id);
-    if (!course) return res.status(404).json({ error: 'Course not found' });
+         {/* Add Video */}
+          <Box mt={4}>
+            <Typography variant="h6">Add Video</Typography>
+            <TextField label="Title" value={video.title} onChange={(e) => setVideo({ ...video, title: e.target.value })} fullWidth />
+            <TextField label="URL" value={video.url} onChange={(e) => setVideo({ ...video, url: e.target.value })} fullWidth />
+            <Button onClick={() => handleAddField('videos', video)} variant="contained" sx={{ mt: 1 }}>
+              Add Video
+            </Button>
+          </Box>
 
-    if (!course.videos) course.videos = [];
-    course.videos.push(req.body);
-    await course.save();
-    res.json(course);
-  } catch (err) {
-    res.status(400).json({ error: 'Failed to add video', details: err.message });
-  }
-});
+          {/* Add Resource */}
+          <Box mt={4}>
+            <Typography variant="h6">Add Resource</Typography>
+            <TextField label="Name" value={resource.name} onChange={(e) => setResource({ ...resource, name: e.target.value })} fullWidth />
+            <TextField label="Link" value={resource.link} onChange={(e) => setResource({ ...resource, link: e.target.value })} fullWidth />
+            <Button onClick={() => handleAddField('resources', resource)} variant="contained" sx={{ mt: 1 }}>
+              Add Resource
+            </Button>
+          </Box>
 
-// Add Resource
-router.put('/:id/resources', authMiddleware, async (req, res) => {
-  try {
-    const course = await Course.findById(req.params.id);
-    if (!course) return res.status(404).json({ error: 'Course not found' });
-
-    if (!course.resources) course.resources = [];
-    course.resources.push(req.body);
-    await course.save();
-    res.json(course);
-  } catch (err) {
-    res.status(400).json({ error: 'Failed to add resource', details: err.message });
-  }
-});
-
-// Add Quiz
-router.put('/:id/quizzes', authMiddleware, async (req, res) => {
-  try {
-    const course = await Course.findById(req.params.id);
-    if (!course) return res.status(404).json({ error: 'Course not found' });
-
-    if (!course.quizzes) course.quizzes = [];
-    course.quizzes.push(req.body);
-    await course.save();
-    res.json(course);
-  } catch (err) {
-    res.status(400).json({ error: 'Failed to add quiz', details: err.message });
-  }
-});
+          {/* Add Quiz */}
+          <Box mt={4}>
+            <Typography variant="h6">Add Quiz</Typography>
+            <TextField label="Question" value={quiz.question} onChange={(e) => setQuiz({ ...quiz, question: e.target.value })} fullWidth />
+            <TextField label="Options (comma-separated)" value={quiz.options} onChange={(e) => setQuiz({ ...quiz, options: e.target.value })} fullWidth />
+            <TextField label="Answer" value={quiz.answer} onChange={(e) => setQuiz({ ...quiz, answer: e.target.value })} fullWidth />
+            <Button
+              onClick={() =>
+                handleAddField('quizzes', {
+                  question: quiz.question,
+                  options: quiz.options.split(',').map((o) => o.trim()),
+                  answer: quiz.answer,
+                })
+              }
+              variant="contained"
+              sx={{ mt: 1 }}
+            >
+              Add Quiz
+            </Button>
+          </Box>
 
         </>
       )}
