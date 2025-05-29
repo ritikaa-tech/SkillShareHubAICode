@@ -3,14 +3,13 @@ const router = express.Router();
 const Course = require('../models/course');
 const authMiddleware = require('../middleware/auth');
 
-
 // ✅ GET all courses
 router.get('/', authMiddleware, async (req, res) => {
   try {
     const courses = await Course.find();
     res.json(courses);
   } catch (err) {
-    res.status(500).json({ error: 'Failed to fetch courses' });
+    res.status(500).json({ error: 'Failed to fetch courses', details: err.message });
   }
 });
 
@@ -21,29 +20,26 @@ router.get('/:id', authMiddleware, async (req, res) => {
     if (!course) return res.status(404).json({ error: 'Course not found' });
     res.json(course);
   } catch (err) {
-    res.status(500).json({ error: 'Failed to fetch course' });
+    res.status(500).json({ error: 'Failed to fetch course', details: err.message });
   }
 });
 
 // ✅ POST (Create) a new course
-router.post('/',authMiddleware, async (req, res) => {
+router.post('/', authMiddleware, async (req, res) => {
   try {
-    console.log("Reached here");
-    
     const newCourse = new Course({
       ...req.body,
-      instructor: req.user.id, // Automatically set from token
+      instructor: req.user.id,
     });
     const savedCourse = await newCourse.save();
     res.status(201).json(savedCourse);
   } catch (err) {
-    
     res.status(400).json({ error: 'Failed to create course', details: err.message });
   }
 });
 
 // ✅ PUT (Update) a course by ID
-router.put('/:id',authMiddleware, async (req, res) => {
+router.put('/:id', authMiddleware, async (req, res) => {
   try {
     const updatedCourse = await Course.findByIdAndUpdate(
       req.params.id,
@@ -58,66 +54,113 @@ router.put('/:id',authMiddleware, async (req, res) => {
 });
 
 // ✅ DELETE a course by ID
-router.delete('/:id',authMiddleware, async (req, res) => {
+router.delete('/:id', authMiddleware, async (req, res) => {
   try {
     const deletedCourse = await Course.findByIdAndDelete(req.params.id);
     if (!deletedCourse) return res.status(404).json({ error: 'Course not found' });
     res.json({ message: 'Course deleted successfully' });
   } catch (err) {
-    res.status(500).json({ error: 'Failed to delete course' });
+    res.status(500).json({ error: 'Failed to delete course', details: err.message });
   }
 });
 
-// Add Video
+// ✅ Add Video
 router.put('/:id/videos', authMiddleware, async (req, res) => {
-  const course = await Course.findById(req.params.id);
-  course.videos.push(req.body);
-  await course.save();
-  res.json(course);
+  try {
+    if (!req.body || !req.body.title || !req.body.url) {
+      return res.status(400).json({ error: 'Invalid video data' });
+    }
+
+    const course = await Course.findById(req.params.id);
+    if (!course) return res.status(404).json({ error: 'Course not found' });
+
+    course.videos.push(req.body);
+    await course.save();
+    res.json(course);
+  } catch (err) {
+    console.error("Error adding video:", err);
+    res.status(500).json({ error: 'Failed to add video', details: err.message });
+  }
 });
 
-// Add Resource
-router.put('/:id/resources',authMiddleware, async (req, res) => {
-  const course = await Course.findById(req.params.id);
-  course.resources.push(req.body);
-  await course.save();
-  res.json(course);
+// ✅ Add Resource
+router.put('/:id/resources', authMiddleware, async (req, res) => {
+  try {
+    if (!req.body || !req.body.title || !req.body.link) {
+      return res.status(400).json({ error: 'Invalid resource data' });
+    }
+
+    const course = await Course.findById(req.params.id);
+    if (!course) return res.status(404).json({ error: 'Course not found' });
+
+    course.resources.push(req.body);
+    await course.save();
+    res.json(course);
+  } catch (err) {
+    console.error("Error adding resource:", err);
+    res.status(500).json({ error: 'Failed to add resource', details: err.message });
+  }
 });
 
-// Add Quiz
-router.put('/:id/quizzes',authMiddleware, async (req, res) => {
-  const course = await Course.findById(req.params.id);
-  course.quizzes.push(req.body);
-  await course.save();
-  res.json(course);
+// ✅ Add Quiz
+router.put('/:id/quizzes', authMiddleware, async (req, res) => {
+  try {
+    if (!req.body || !req.body.question || !req.body.options || !req.body.answer) {
+      return res.status(400).json({ error: 'Invalid quiz data' });
+    }
+
+    const course = await Course.findById(req.params.id);
+    if (!course) return res.status(404).json({ error: 'Course not found' });
+
+    course.quizzes.push(req.body);
+    await course.save();
+    res.json(course);
+  } catch (err) {
+    console.error("Error adding quiz:", err);
+    res.status(500).json({ error: 'Failed to add quiz', details: err.message });
+  }
 });
 
-// Delete Video
+// ✅ Delete Video
 router.delete('/:id/videos/:index', authMiddleware, async (req, res) => {
-  const course = await Course.findById(req.params.id);
-  course.videos.splice(req.params.index, 1);
-  await course.save();
-  res.json(course);
+  try {
+    const course = await Course.findById(req.params.id);
+    if (!course) return res.status(404).json({ error: 'Course not found' });
+
+    course.videos.splice(req.params.index, 1);
+    await course.save();
+    res.json(course);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to delete video', details: err.message });
+  }
 });
 
-// Delete Resource
+// ✅ Delete Resource
 router.delete('/:id/resources/:index', authMiddleware, async (req, res) => {
-  const course = await Course.findById(req.params.id);
-  course.resources.splice(req.params.index, 1);
-  await course.save();
-  res.json(course);
+  try {
+    const course = await Course.findById(req.params.id);
+    if (!course) return res.status(404).json({ error: 'Course not found' });
+
+    course.resources.splice(req.params.index, 1);
+    await course.save();
+    res.json(course);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to delete resource', details: err.message });
+  }
 });
 
-// Delete Quiz
+// ✅ Delete Quiz
 router.delete('/:id/quizzes/:index', authMiddleware, async (req, res) => {
-  const course = await Course.findById(req.params.id);
-  course.quizzes.splice(req.params.index, 1);
-  await course.save();
-  res.json(course);
+  try {
+    const course = await Course.findById(req.params.id);
+    if (!course) return res.status(404).json({ error: 'Course not found' });
+
+    course.quizzes.splice(req.params.index, 1);
+    await course.save();
+    res.json(course);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to delete quiz', details: err.message });
+  }
 });
-
-
-
-
 
 module.exports = router;
