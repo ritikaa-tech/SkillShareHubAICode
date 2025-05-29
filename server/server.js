@@ -15,9 +15,9 @@ const adminRoutes = require('./routes/admin'); // Uncomment if you have admin ro
 const app = express();
 // Middleware
 app.use(cors({
-  origin: 'https://skillsharehub-526z.onrender.com',
-  credentials: true, // if you're using cookies or auth headers
+  origin: '*', // allow all origins temporarily
 }));
+
 app.use(express.json());
 
 
