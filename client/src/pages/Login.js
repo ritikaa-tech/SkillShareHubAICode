@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import './Login.css';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext'; // Make sure the path is correct
+import { useAuth } from '../context/AuthContext';
 
 function Login() {
   const [email, setEmail] = useState('');
@@ -10,11 +10,10 @@ function Login() {
   const [success, setSuccess] = useState('');
   const navigate = useNavigate();
 
-  const { login } = useAuth(); // ⬅️ get the login function from context
+  const { login } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Submitting login with password:", `"${password}"`, "Length:", password.length);
     try {
       const response = await fetch('https://skillsharehubbackend.onrender.com/api/users/login', {
         method: 'POST',
@@ -29,12 +28,7 @@ function Login() {
       if (response.ok) {
         setSuccess('Login successful!');
         setError('');
-
-        // Update AuthContext
-        console.log('Login data:', data);
-        login(data.user, data.token); // ⬅️ use context to set token and user
-
-        console.log('Login success:', data);
+        login(data.user, data.token);
         navigate('/dashboard');
       } else {
         setError(data.message || 'Login failed');
@@ -48,28 +42,28 @@ function Login() {
   };
 
   return (
-    <div>
-      <h2>Login</h2>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      {success && <p style={{ color: 'green' }}>{success}</p>}
-      <form onSubmit={handleSubmit}>
+    <div className="login-container">
+      <h2 className="login-title">Login</h2>
+      {error && <p className="login-error">{error}</p>}
+      {success && <p className="login-success">{success}</p>}
+      <form className="login-form" onSubmit={handleSubmit}>
         <input 
+          className="login-input"
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="Email"
           required
         />
-        <br />
         <input 
+          className="login-input"
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           placeholder="Password"
           required
         />
-        <br />
-        <button type="submit">Login</button>
+        <button className="login-button" type="submit">Login</button>
       </form>
     </div>
   );
