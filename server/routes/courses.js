@@ -75,6 +75,9 @@ router.put('/:id/videos', authMiddleware, async (req, res) => {
     if (!course) return res.status(404).json({ error: 'Course not found' });
 
     course.videos.push(req.body);
+    if (!course.instructor) {
+      course.instructor = req.user.id;
+    }
     await course.save();
     res.json(course);
   } catch (err) {
