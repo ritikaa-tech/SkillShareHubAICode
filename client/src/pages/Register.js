@@ -7,6 +7,7 @@ import {
   Paper,
   Box,
   Alert,
+  MenuItem,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import './Register.css';
@@ -18,6 +19,7 @@ function Register() {
     name: '',
     email: '',
     password: '',
+    role: 'user', // Default role
   });
 
   const [error, setError] = useState('');
@@ -49,7 +51,7 @@ function Register() {
       if (res.ok) {
         setSuccess('Registration successful! You can now log in.');
         setError('');
-        setFormData({ name: '', email: '', password: '' });
+        setFormData({ name: '', email: '', password: '', role: 'user' });
         setTimeout(() => navigate('/login'), 2000);
       } else {
         setError(data.message || 'Registration failed');
@@ -97,6 +99,18 @@ function Register() {
               onChange={handleChange}
               required
             />
+            <TextField
+              select
+              fullWidth
+              label="Role"
+              name="role"
+              value={formData.role}
+              onChange={handleChange}
+              required
+            >
+              <MenuItem value="user">User</MenuItem>
+              <MenuItem value="admin">Admin</MenuItem>
+            </TextField>
             <Button variant="contained" color="primary" type="submit" fullWidth>
               Register
             </Button>
