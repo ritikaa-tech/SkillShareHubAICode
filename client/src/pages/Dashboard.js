@@ -12,6 +12,7 @@ import {
   Box,
   TextField,
 } from '@mui/material';
+import './Dashboard.css'; // ✅ Import custom styles
 
 const Dashboard = () => {
   const { token } = useAuth();
@@ -116,16 +117,17 @@ const Dashboard = () => {
       console.error('Save failed:', err);
     }
   };
+
   const handlePayment = async (e) => {
-    e.stopPropagation(); // prevent the card's onClick from firing
+    e.stopPropagation();
     const options = {
-      key: "rzp_test_I32MxpVUddAgQo", // Replace with your Razorpay Key ID
-      amount: 50000, // Amount in paise (e.g., 50000 = ₹500)
+      key: "rzp_test_I32MxpVUddAgQo",
+      amount: 50000,
       currency: "INR",
       name: "Your Company Name",
       description: "Test Transaction",
-      image: "https://your-logo-url.com/logo.png", // Optional
-      order_id: "", // Replace with order ID from your backend
+      image: "https://your-logo-url.com/logo.png",
+      order_id: "",
       handler: async function (response) {
         const data = await axios.post('https://skillsharehubbackend.onrender.com/api/payment/verify', {
           razorpay_order_id: response.razorpay_order_id,
@@ -152,8 +154,8 @@ const Dashboard = () => {
   };
 
   return (
-    <Container maxWidth="lg">
-      <Box sx={{ mt: 4 }}>
+    <Container maxWidth="lg" className="dashboard-container">
+      <Box>
         <Typography variant="h4" gutterBottom>Dashboard</Typography>
 
         <Box sx={{ mt: 4 }}>
@@ -168,25 +170,24 @@ const Dashboard = () => {
               <Grid item xs={12}>
                 <Card>
                   <CardContent>
-                    <Typography>No courses added yet.</Typography>
+                    <Typography className="no-courses">No courses added yet.</Typography>
                   </CardContent>
                 </Card>
               </Grid>
             ) : (
               courses.map((course) => (
                 <Grid item xs={12} sm={6} md={4} key={course._id}>
-                  <Card sx={{ cursor: 'pointer' }} onClick={() => handleCardClick(course._id)}>
+                  <Card className="course-card" onClick={() => handleCardClick(course._id)}>
                     <CardContent>
                       <Typography variant="h6">{course.title}</Typography>
                       <Typography>{course.description}</Typography>
                       <Typography color="textSecondary">Category: {course.category}</Typography>
                       <Typography color="textSecondary">Price: ${course.price}</Typography>
-                      <Box sx={{ mt: 2 }} onClick={(e) => e.stopPropagation()}>
+                      <Box className="course-buttons" onClick={(e) => e.stopPropagation()}>
                         <Button
                           variant="outlined"
                           size="small"
                           onClick={(e) => handleEditClick(e, course)}
-                          sx={{ mr: 1 }}
                         >
                           Edit
                         </Button>
@@ -202,9 +203,7 @@ const Dashboard = () => {
                           variant="outlined"
                           size="small"
                           onClick={handlePayment}
-                          sx={{ mr: 1 }}
                         >
-
                           Buy Course
                         </Button>
                       </Box>
@@ -219,7 +218,7 @@ const Dashboard = () => {
             <Box
               component="form"
               onSubmit={handleCourseSubmit}
-              sx={{ mt: 4, display: 'flex', flexDirection: 'column', gap: 2 }}
+              className="course-form"
             >
               <TextField label="Title" value={title} onChange={(e) => setTitle(e.target.value)} required />
               <TextField
