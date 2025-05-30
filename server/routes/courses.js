@@ -8,6 +8,7 @@ const auth = require('../middleware/auth');
 const isAdmin = require('../middleware/isAdmin');
 const User = require('../models/User');
 const Enrollment = require('../models/Enrollment');
+const upload = require('../middleware/upload');
 
 // Configure multer for video uploads
 const videoStorage = multer.diskStorage({
