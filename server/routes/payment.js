@@ -6,22 +6,37 @@ const Order = require('../models/Order.js');
 const Course = require('../models/Course.js');
 const Enrollment = require('../models/Enrollment.js');
 const auth = require('../middleware/auth');
+const config = require('../config/production');
 const router = express.Router();
 
-// Check if Razorpay credentials are available
-if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_SECRET) {
-  throw new Error('Razorpay credentials are missing. Please set RAZORPAY_KEY_ID and RAZORPAY_SECRET environment variables.');
+// Initialize Razorpay with error handling
+let razorpay;
+try {
+  if (!config.razorpayKeyId || !config.razorpayKeySecret) {
+    console.warn('Razorpay credentials are missing. Payment functionality will be disabled.');
+    console.warn('RAZORPAY_KEY_ID:', config.razorpayKeyId ? 'Set' : 'Not Set');
+    console.warn('RAZORPAY_KEY_SECRET:', config.razorpayKeySecret ? 'Set' : 'Not Set');
+  } else {
+    razorpay = new Razorpay({
+      key_id: config.razorpayKeyId,
+      key_secret: config.razorpayKeySecret
+    });
+    console.log('Razorpay initialized successfully');
+  }
+} catch (error) {
+  console.error('Error initializing Razorpay:', error);
 }
-
-// Initialize Razorpay
-const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID,
-  key_secret: process.env.RAZORPAY_SECRET
-});
 
 // Create order
 router.post('/create-order', auth, async (req, res) => {
   try {
+    if (!razorpay) {
+      return res.status(503).json({ 
+        success: false, 
+        error: "Payment service is currently unavailable. Please try again later." 
+      });
+    }
+
     const { courseId } = req.body;
     
     // Get course details
@@ -54,7 +69,7 @@ router.post('/create-order', auth, async (req, res) => {
     res.json({ 
       success: true, 
       order,
-      key: process.env.RAZORPAY_KEY_ID
+      key: config.razorpayKeyId
     });
   } catch (error) {
     console.error("Order creation error:", error);
@@ -65,12 +80,19 @@ router.post('/create-order', auth, async (req, res) => {
 // Verify payment
 router.post('/verify', auth, async (req, res) => {
   try {
+    if (!razorpay) {
+      return res.status(503).json({ 
+        success: false, 
+        error: "Payment service is currently unavailable. Please try again later." 
+      });
+    }
+
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
 
     // Verify signature
     const sign = razorpay_order_id + "|" + razorpay_payment_id;
     const expectedSign = crypto
-      .createHmac('sha256', process.env.RAZORPAY_SECRET)
+      .createHmac('sha256', config.razorpayKeySecret)
       .update(sign.toString())
       .digest('hex');
 

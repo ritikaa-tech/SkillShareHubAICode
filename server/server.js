@@ -1,4 +1,13 @@
+// Load environment variables first
 require('dotenv').config();
+
+// Log environment variables (without sensitive data)
+console.log('Environment:', process.env.NODE_ENV);
+console.log('MongoDB URI:', process.env.MONGODB_URI ? 'Set' : 'Not Set');
+console.log('JWT Secret:', process.env.JWT_SECRET ? 'Set' : 'Not Set');
+console.log('Razorpay Key ID:', process.env.RAZORPAY_KEY_ID ? 'Set' : 'Not Set');
+console.log('Razorpay Key Secret:', process.env.RAZORPAY_KEY_SECRET ? 'Set' : 'Not Set');
+
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
