@@ -27,7 +27,7 @@ app.use(helmet({
       scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
       styleSrc: ["'self'", "'unsafe-inline'"],
       imgSrc: ["'self'", "data:", "https:"],
-      connectSrc: ["'self'", "https://api.razorpay.com"]
+      connectSrc: ["'self'", "https://api.razorpay.com", "https://skillsharehubaicodebackend.onrender.com"]
     }
   }
 }));
@@ -42,16 +42,34 @@ const limiter = rateLimit({
 app.use(limiter);
 
 // CORS configuration
-app.use(cors({
-  origin: config.corsOrigin,
+const corsOptions = {
+  origin: function (origin, callback) {
+    const allowedOrigins = [
+      'https://skillsharehubaicodebackend.onrender.com',
+      'http://localhost:3000',
+      'http://localhost:5002'
+    ];
+    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
-}));
+};
+
+app.use(cors(corsOptions));
 
 // Body parser
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
 
 // Static files
 app.use('/uploads', express.static(path.join(__dirname, config.uploadDir)));
@@ -67,10 +85,13 @@ app.use('/api/analytics', require('./routes/analytics'));
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-  console.error(err.stack);
+  console.error('Error:', err);
   const status = err.status || 500;
   const message = config.nodeEnv === 'development' ? err.message : 'Internal server error';
-  res.status(status).json({ error: message });
+  res.status(status).json({ 
+    error: message,
+    timestamp: new Date().toISOString()
+  });
 });
 
 // Database connection with retry
@@ -81,7 +102,7 @@ const connectDB = async (retries = 5) => {
       useUnifiedTopology: true,
       serverSelectionTimeoutMS: 5000
     });
-    console.log('MongoDB connected');
+    console.log('MongoDB connected successfully');
   } catch (err) {
     console.error('MongoDB connection error:', err);
     if (retries > 0) {
@@ -94,16 +115,24 @@ const connectDB = async (retries = 5) => {
   }
 };
 
-connectDB();
-
 // Start server
-const PORT = config.port;
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server running on port ${PORT}`);
-  console.log(`Environment: ${config.nodeEnv}`);
-  console.log(`CORS Origin: ${config.corsOrigin}`);
-  console.log(`API URL: ${config.apiUrl}`);
-  console.log(`Upload Directory: ${config.uploadDir}`);
-  console.log(`Rate Limit: ${config.rateLimitMax} requests per ${config.rateLimitWindow/1000/60} minutes`);
-});
+const startServer = async () => {
+  try {
+    await connectDB();
+    const PORT = config.port;
+    app.listen(PORT, '0.0.0.0', () => {
+      console.log(`Server running on port ${PORT}`);
+      console.log(`Environment: ${config.nodeEnv}`);
+      console.log(`CORS Origin: ${config.corsOrigin}`);
+      console.log(`API URL: ${config.apiUrl}`);
+      console.log(`Upload Directory: ${config.uploadDir}`);
+      console.log(`Rate Limit: ${config.rateLimitMax} requests per ${config.rateLimitWindow/1000/60} minutes`);
+    });
+  } catch (error) {
+    console.error('Failed to start server:', error);
+    process.exit(1);
+  }
+};
+
+startServer();
 
