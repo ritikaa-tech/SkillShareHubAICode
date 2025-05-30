@@ -47,8 +47,9 @@ import {
   Download as DownloadIcon,
   Star as StarIcon
 } from '@mui/icons-material';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+import { apiService } from '../../utils/api';
 
 const InstructorDashboard = () => {
   const [activeTab, setActiveTab] = useState(0);
@@ -94,24 +95,11 @@ const InstructorDashboard = () => {
   const fetchInstructorData = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
-      if (!token) {
-        throw new Error('No authentication token found');
-      }
-
       const [coursesRes, enrollmentsRes, earningsRes, analyticsRes] = await Promise.all([
-        axios.get('http://localhost:5002/api/instructor/courses', {
-          headers: { Authorization: `Bearer ${token}` }
-        }),
-        axios.get('http://localhost:5002/api/instructor/dashboard', {
-          headers: { Authorization: `Bearer ${token}` }
-        }),
-        axios.get('http://localhost:5002/api/instructor/dashboard', {
-          headers: { Authorization: `Bearer ${token}` }
-        }),
-        axios.get('http://localhost:5002/api/instructor/dashboard', {
-          headers: { Authorization: `Bearer ${token}` }
-        })
+        apiService.getCourses(),
+        apiService.getEnrollments(),
+        apiService.getProfile(),
+        apiService.getProfile()
       ]);
 
       setCourses(coursesRes.data);
@@ -131,7 +119,7 @@ const InstructorDashboard = () => {
       setError('');
     } catch (err) {
       console.error('Error fetching instructor data:', err);
-      setError(err.response?.data?.message || 'Failed to fetch instructor data. Please try again later.');
+      setError(err.message || 'Failed to fetch instructor data. Please try again later.');
     } finally {
       setLoading(false);
     }
@@ -154,16 +142,13 @@ const InstructorDashboard = () => {
 
   const handleCourseSubmit = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await axios.post('http://localhost:5002/api/courses', newCourse, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await apiService.createCourse(newCourse);
       setCourses([...courses, response.data]);
       handleCloseDialog();
       fetchInstructorData();
     } catch (err) {
       console.error('Error creating course:', err);
-      setError(err.response?.data?.error || 'Failed to create course. Please try again later.');
+      setError(err.message || 'Failed to create course. Please try again later.');
     }
   };
 
@@ -174,14 +159,11 @@ const InstructorDashboard = () => {
   const handleDeleteCourse = async (courseId) => {
     if (window.confirm('Are you sure you want to delete this course?')) {
       try {
-        const token = localStorage.getItem('token');
-        await axios.delete(`http://localhost:5002/api/courses/${courseId}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        await apiService.deleteCourse(courseId);
         setCourses(courses.filter(course => course._id !== courseId));
       } catch (err) {
         console.error('Error deleting course:', err);
-        setError(err.response?.data?.error || 'Failed to delete course. Please try again later.');
+        setError(err.message || 'Failed to delete course. Please try again later.');
       }
     }
   };
@@ -210,17 +192,11 @@ const InstructorDashboard = () => {
   const handleDeleteContent = async (courseId, contentId) => {
     if (window.confirm('Are you sure you want to delete this content?')) {
       try {
-        const token = localStorage.getItem('token');
-        await axios.delete(
-          `http://localhost:5002/api/courses/${courseId}/content/${contentId}`,
-          {
-            headers: { Authorization: `Bearer ${token}` }
-          }
-        );
+        await apiService.deleteCourse(courseId);
         fetchInstructorData();
       } catch (err) {
         console.error('Error deleting content:', err);
-        setError(err.response?.data?.error || 'Failed to delete content. Please try again later.');
+        setError(err.message || 'Failed to delete content. Please try again later.');
       }
     }
   };
@@ -241,27 +217,19 @@ const InstructorDashboard = () => {
         }
       }
 
-      const token = localStorage.getItem('token');
       let response;
-
       if (editingContent) {
-        // Update existing content
-        response = await axios.put(
-          `http://localhost:5002/api/courses/${selectedCourse._id}/content/${editingContent._id}`,
-          newContent,
-          {
-            headers: { Authorization: `Bearer ${token}` }
-          }
-        );
+        response = await apiService.updateCourse(selectedCourse._id, {
+          ...selectedCourse,
+          content: selectedCourse.content.map(c => 
+            c._id === editingContent._id ? newContent : c
+          )
+        });
       } else {
-        // Create new content
-        response = await axios.post(
-          `http://localhost:5002/api/courses/${selectedCourse._id}/content`,
-          newContent,
-          {
-            headers: { Authorization: `Bearer ${token}` }
-          }
-        );
+        response = await apiService.updateCourse(selectedCourse._id, {
+          ...selectedCourse,
+          content: [...selectedCourse.content, newContent]
+        });
       }
 
       if (response.data) {
@@ -277,28 +245,24 @@ const InstructorDashboard = () => {
       }
     } catch (err) {
       console.error('Error saving content:', err);
-      setError(err.response?.data?.error || 'Failed to save content. Please try again later.');
+      setError(err.message || 'Failed to save content. Please try again later.');
     }
   };
 
   const handleExportAnalytics = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await axios.get('/api/analytics/export', {
-        headers: { Authorization: `Bearer ${token}` },
-        responseType: 'blob'
-      });
-      
-      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const response = await apiService.getProfile();
+      const blob = new Blob([JSON.stringify(response.data)], { type: 'application/json' });
+      const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', 'course-analytics.csv');
+      link.setAttribute('download', 'course-analytics.json');
       document.body.appendChild(link);
       link.click();
       link.remove();
     } catch (err) {
       console.error('Error exporting analytics:', err);
-      setError(err.response?.data?.error || 'Failed to export analytics. Please try again later.');
+      setError(err.message || 'Failed to export analytics. Please try again later.');
     }
   };
 
