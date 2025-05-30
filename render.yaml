@@ -1,0 +1,38 @@
+services:
+  - type: web
+    name: skillsharehub-api
+    env: node
+    buildCommand: cd server && npm install
+    startCommand: cd server && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: RAZORPAY_KEY_ID
+        sync: false
+      - key: RAZORPAY_KEY_SECRET
+        sync: false
+      - key: CORS_ORIGIN
+        value: https://skillsharehub.onrender.com
+      - key: PORT
+        value: 10000
+      - key: UPLOAD_DIR
+        value: uploads
+      - key: RATE_LIMIT_WINDOW
+        value: 900000
+      - key: RATE_LIMIT_MAX
+        value: 100
+
+  - type: web
+    name: skillsharehub-client
+    env: node
+    buildCommand: cd client && npm install && npm run build
+    startCommand: cd client && serve -s build
+    envVars:
+      - key: REACT_APP_API_URL
+        value: https://skillsharehub-api.onrender.com/api
+      - key: PORT
+        value: 10001 
