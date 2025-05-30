@@ -1,4 +1,4 @@
-# SkillShareHub
+# SkillShareHubAICode
 
 A platform for sharing and learning skills through online courses.
 
@@ -31,8 +31,8 @@ A platform for sharing and learning skills through online courses.
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/SkillShareHub.git
-cd SkillShareHub
+git clone https://github.com/yourusername/SkillShareHubAICode.git
+cd SkillShareHubAICode
 ```
 
 2. Install dependencies:
@@ -74,7 +74,7 @@ The application will be available at:
 ## Project Structure
 
 ```
-SkillShareHub/
+SkillShareHubAICode/
 ├── client/                 # Frontend React application
 │   ├── public/            # Static files
 │   └── src/               # React source files
@@ -131,4 +131,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## Contact
 
 Your Name - your.email@example.com
-Project Link: https://github.com/yourusername/SkillShareHub
+Project Link: https://github.com/yourusername/SkillShareHubAICode
