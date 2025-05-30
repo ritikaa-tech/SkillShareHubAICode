@@ -10,6 +10,7 @@ import {
   MenuItem,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import './Register.css';
 
 function Register() {
@@ -24,6 +25,7 @@ function Register() {
 
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     setFormData({
@@ -36,47 +38,54 @@ function Register() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError('');
+    setSuccess('');
 
     try {
-      const res = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
+      const response = await axios.post(
+        'https://skillsharehubaicodebackend.onrender.com/api/auth/register',
+        {
           username: formData.name,
           email: formData.email,
           password: formData.password,
           role: formData.role
-        }),
-      });
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      );
 
-      const data = await res.json();
-
-      if (res.ok) {
+      if (response.data.success) {
         setSuccess('Registration successful! You can now log in.');
-        setError('');
         setFormData({ name: '', email: '', password: '', role: 'user' });
         setTimeout(() => navigate('/login'), 2000);
       } else {
-        // Handle validation errors
-        if (data.errors && Array.isArray(data.errors)) {
-          const errorMessages = data.errors.map(err => err.msg).join(', ');
-          setError(errorMessages);
-        } else {
-          setError(data.message || 'Registration failed');
-        }
-        setSuccess('');
+        setError(response.data.message || 'Registration failed');
       }
     } catch (err) {
       console.error('Registration error:', err);
-      if (!navigator.onLine) {
-        setError('No internet connection. Please check your network and try again.');
+      
+      if (err.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        if (err.response.data.errors && Array.isArray(err.response.data.errors)) {
+          const errorMessages = err.response.data.errors.map(err => err.msg).join(', ');
+          setError(errorMessages);
+        } else {
+          setError(err.response.data.message || 'Registration failed');
+        }
+      } else if (err.request) {
+        // The request was made but no response was received
+        setError('No response from server. Please try again later.');
       } else {
-        setError('Unable to connect to the server. Please try again later.');
+        // Something happened in setting up the request that triggered an Error
+        setError('An error occurred. Please try again.');
       }
-      setSuccess('');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -97,6 +106,7 @@ function Register() {
               value={formData.name}
               onChange={handleChange}
               required
+              disabled={loading}
             />
             <TextField
               fullWidth
@@ -106,6 +116,7 @@ function Register() {
               value={formData.email}
               onChange={handleChange}
               required
+              disabled={loading}
             />
             <TextField
               fullWidth
@@ -115,6 +126,7 @@ function Register() {
               value={formData.password}
               onChange={handleChange}
               required
+              disabled={loading}
             />
             <TextField
               select
@@ -124,13 +136,20 @@ function Register() {
               value={formData.role}
               onChange={handleChange}
               required
+              disabled={loading}
             >
               <MenuItem value="user">User</MenuItem>
               <MenuItem value="instructor">Instructor</MenuItem>
               <MenuItem value="admin">Admin</MenuItem>
             </TextField>
-            <Button variant="contained" color="primary" type="submit" fullWidth>
-              Register
+            <Button 
+              variant="contained" 
+              color="primary" 
+              type="submit" 
+              fullWidth
+              disabled={loading}
+            >
+              {loading ? 'Registering...' : 'Register'}
             </Button>
           </form>
         </Paper>

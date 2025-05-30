@@ -29,9 +29,14 @@ router.post(
   ],
   async (req, res) => {
     try {
+      // Log the request body for debugging
+      console.log('Registration request body:', req.body);
+
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
+        console.log('Validation errors:', errors.array());
         return res.status(400).json({ 
+          success: false,
           message: 'Validation failed',
           errors: errors.array() 
         });
@@ -42,14 +47,21 @@ router.post(
       // Check if user already exists
       let user = await User.findOne({ email });
       if (user) {
-        return res.status(400).json({ message: 'User already exists' });
+        return res.status(400).json({ 
+          success: false,
+          message: 'User already exists' 
+        });
       }
+
+      // Hash password
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(password, salt);
 
       // Create new user
       user = new User({
         name: username,
         email,
-        password,
+        password: hashedPassword,
         role: role || 'user'
       });
 
@@ -62,7 +74,8 @@ router.post(
         { expiresIn: '24h' }
       );
 
-      res.status(201).json({
+      return res.status(201).json({
+        success: true,
         message: 'Registration successful',
         token,
         user: {
@@ -74,7 +87,8 @@ router.post(
       });
     } catch (error) {
       console.error('Registration error:', error);
-      res.status(500).json({ 
+      return res.status(500).json({ 
+        success: false,
         message: 'Server error',
         error: process.env.NODE_ENV === 'development' ? error.message : undefined
       });
