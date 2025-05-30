@@ -62,7 +62,7 @@ const CreateCourse = () => {
       formData.append('video', file);
       
       try {
-        const response = await axios.post('http://localhost:5002/api/courses/upload-video', formData, {
+        const response = await axios.post('https://skillsharehubaicodebackend.onrender.com/api/courses/upload-video', formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
             'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -106,7 +106,7 @@ const CreateCourse = () => {
       formData.append('resource', file);
       
       try {
-        const response = await axios.post('http://localhost:5002/api/courses/upload-resource', formData, {
+        const response = await axios.post('https://skillsharehubaicodebackend.onrender.com/api/courses/upload-resource', formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
             'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -178,7 +178,7 @@ const CreateCourse = () => {
   // Form submission
   const handleSubmit = async () => {
     try {
-      const response = await axios.post('http://localhost:5002/api/courses', courseData, {
+      const response = await axios.post('https://skillsharehubaicodebackend.onrender.com/api/courses', courseData, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }

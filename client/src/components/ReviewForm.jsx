@@ -10,7 +10,7 @@ const ReviewForm = ({ courseId, userId, onReviewSubmit }) => {
     e.preventDefault();
     try {
       console.log('Submitting review:', { userId, courseId, rating, comment });
-      await axios.post('http://localhost:5002/api/reviews/', { userId, courseId, rating, comment });
+      await axios.post('https://skillsharehubaicodebackend.onrender.com/api/reviews/', { userId, courseId, rating, comment });
       onReviewSubmit();
       setRating(0);
       setComment('');

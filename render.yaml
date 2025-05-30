@@ -25,6 +25,10 @@ services:
         value: 900000
       - key: RATE_LIMIT_MAX
         value: 100
+      - key: RAZORPAY_KEY_ID
+        value: rzp_test_your_key_id
+      - key: RAZORPAY_KEY_SECRET
+        value: your_key_secret
 
   - type: web
     name: skillsharehub-client

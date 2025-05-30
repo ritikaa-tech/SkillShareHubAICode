@@ -55,7 +55,7 @@ const CourseList = () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:5002/api/courses', {
+      const response = await axios.get('https://skillsharehubaicodebackend.onrender.com/api/courses', {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -73,7 +73,7 @@ const CourseList = () => {
   const fetchUserRatings = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:5002/api/enrollments/mine', {
+      const response = await axios.get('https://skillsharehubaicodebackend.onrender.com/api/enrollments/mine', {
         headers: { Authorization: `Bearer ${token}` }
       });
       
@@ -111,7 +111,7 @@ const CourseList = () => {
 
       // Create payment order
       const orderResponse = await axios.post(
-        'http://localhost:5002/api/payments/create-order',
+        'https://skillsharehubaicodebackend.onrender.com/api/payments/create-order',
         { courseId: selectedCourse._id },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -134,7 +134,7 @@ const CourseList = () => {
           try {
             // Verify payment
             const verifyResponse = await axios.post(
-              'http://localhost:5002/api/payments/verify',
+              'https://skillsharehubaicodebackend.onrender.com/api/payments/verify',
               {
                 razorpay_order_id: response.razorpay_order_id,
                 razorpay_payment_id: response.razorpay_payment_id,

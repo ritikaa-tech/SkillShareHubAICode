@@ -1,8 +1,8 @@
-import axios from 'axios';
+const axios = require('axios');
 
-const baseURL = process.env.REACT_APP_API_URL || 'http://localhost:5002/api';
+const baseURL = process.env.REACT_APP_API_URL || 'https://skillsharehubaicodebackend.onrender.com/api';
 
-const axiosInstance = axios.create({
+const instance = axios.create({
   baseURL,
   timeout: 10000,
   headers: {
@@ -11,7 +11,7 @@ const axiosInstance = axios.create({
 });
 
 // Request interceptor
-axiosInstance.interceptors.request.use(
+instance.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
     if (token) {
@@ -25,7 +25,7 @@ axiosInstance.interceptors.request.use(
 );
 
 // Response interceptor
-axiosInstance.interceptors.response.use(
+instance.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response) {
@@ -46,4 +46,4 @@ axiosInstance.interceptors.response.use(
   }
 );
 
-export default axiosInstance; 
+module.exports = instance; 

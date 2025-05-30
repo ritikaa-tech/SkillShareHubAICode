@@ -38,7 +38,7 @@ const CourseRating = ({ courseId, userRating, onRatingSubmit }) => {
       }
 
       // First check if user is enrolled
-      const enrollmentResponse = await axios.get(`http://localhost:5002/api/enrollments/mine`, {
+      const enrollmentResponse = await axios.get(`https://skillsharehubaicodebackend.onrender.com/api/enrollments/mine`, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
@@ -53,7 +53,7 @@ const CourseRating = ({ courseId, userRating, onRatingSubmit }) => {
 
       // Submit the rating
       const response = await axios.post(
-        `http://localhost:5002/api/courses/${courseId}/rate`,
+        `https://skillsharehubaicodebackend.onrender.com/api/courses/${courseId}/rate`,
         { rating, review },
         { headers: { Authorization: `Bearer ${token}` } }
       );

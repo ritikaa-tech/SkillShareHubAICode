@@ -35,14 +35,14 @@ const CourseDetail = () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
-      const response = await axios.get(`http://localhost:5002/api/courses/${id}`, {
+      const response = await axios.get(`https://skillsharehubaicodebackend.onrender.com/api/courses/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setCourse(response.data);
 
       // Fetch user's rating if they're enrolled
       if (user) {
-        const enrollmentResponse = await axios.get(`http://localhost:5002/api/enrollments/mine`, {
+        const enrollmentResponse = await axios.get(`https://skillsharehubaicodebackend.onrender.com/api/enrollments/mine`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         const userEnrollment = enrollmentResponse.data.find(e => e.course._id === id);
@@ -68,7 +68,7 @@ const CourseDetail = () => {
     }
     try {
       const token = localStorage.getItem('token');
-      await axios.post(`http://localhost:5002/api/enrollments/${id}`, {}, {
+      await axios.post(`https://skillsharehubaicodebackend.onrender.com/api/enrollments/${id}`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
       navigate('/dashboard');

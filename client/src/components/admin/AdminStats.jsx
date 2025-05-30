@@ -36,7 +36,7 @@ const AdminStats = () => {
         throw new Error('No authentication token found');
       }
 
-      const res = await axios.get('http://localhost:5002/api/admin/analytics', {
+      const res = await axios.get('https://skillsharehubaicodebackend.onrender.com/api/admin/analytics', {
         headers: {
           Authorization: `Bearer ${token}`
         }

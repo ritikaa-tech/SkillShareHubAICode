@@ -16,7 +16,7 @@ const MakeAdmin = () => {
       }
 
       const response = await axios.patch(
-        `http://localhost:5002/api/users/make-admin/${userId}`,
+        `https://skillsharehubaicodebackend.onrender.com/api/users/make-admin/${userId}`,
         {},
         {
           headers: {
