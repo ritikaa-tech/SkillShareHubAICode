@@ -1,9 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
-const User = require('../models/User'); // adjust the path if needed
+const User = require('../models/User.js'); // adjust the path if needed
 const jwt = require('jsonwebtoken');
-const JWT_SECRET = process.env.JWT_SECRET || 'your_default_jwt_secret_key_here';
 const auth = require('../middleware/auth');
 const { check, validationResult } = require('express-validator');
 

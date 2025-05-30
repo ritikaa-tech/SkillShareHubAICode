@@ -2,9 +2,9 @@ const express = require('express');
 const router = express.Router();
 const isAdmin = require('../middleware/isAdmin');
 const auth = require('../middleware/auth');
-const User = require('../models/User');
-const Review = require('../models/Review');
-const Course = require('../models/Course');
+const User = require('../models/User.js');
+const Review = require('../models/Review.js');
+const Course = require('../models/Course.js');
 
 // Get all users
 router.get('/users', auth, isAdmin, async (req, res) => {

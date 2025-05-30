@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const Progress = require('../models/Progress');
+const Progress = require('../models/Progress.js');
 
 // Get progress for a specific course
 router.get('/:courseId', async (req, res) => {

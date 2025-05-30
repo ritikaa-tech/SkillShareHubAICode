@@ -1,8 +1,8 @@
 // routes/reviews.js
 const express = require('express');
 const router = express.Router();
-const Review = require('../models/Review'); // Your Mongoose model
-const Course = require('../models/Course');
+const Review = require('../models/Review.js');
+const Course = require('../models/Course.js');
 const auth = require('../middleware/auth');
 const { check, validationResult } = require('express-validator');
 

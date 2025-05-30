@@ -2,21 +2,21 @@
 const Razorpay = require('razorpay');
 const express = require('express');
 const crypto = require('crypto');
-const Order = require('../models/Order');
-const Course = require('../models/Course');
-const Enrollment = require('../models/Enrollment');
+const Order = require('../models/Order.js');
+const Course = require('../models/Course.js');
+const Enrollment = require('../models/Enrollment.js');
 const auth = require('../middleware/auth');
 const router = express.Router();
 
 // Check if Razorpay credentials are available
 if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_SECRET) {
-  console.warn('Razorpay credentials are missing. Payment functionality will not work.');
+  throw new Error('Razorpay credentials are missing. Please set RAZORPAY_KEY_ID and RAZORPAY_SECRET environment variables.');
 }
 
 // Initialize Razorpay
 const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID || 'rzp_test_I32MxpVUddAgQo',
-  key_secret: process.env.RAZORPAY_SECRET || 'your_razorpay_secret_key_here',
+  key_id: process.env.RAZORPAY_KEY_ID,
+  key_secret: process.env.RAZORPAY_SECRET
 });
 
 // Create order
@@ -54,7 +54,7 @@ router.post('/create-order', auth, async (req, res) => {
     res.json({ 
       success: true, 
       order,
-      key: process.env.RAZORPAY_KEY_ID || 'rzp_test_I32MxpVUddAgQo'
+      key: process.env.RAZORPAY_KEY_ID
     });
   } catch (error) {
     console.error("Order creation error:", error);
@@ -70,7 +70,7 @@ router.post('/verify', auth, async (req, res) => {
     // Verify signature
     const sign = razorpay_order_id + "|" + razorpay_payment_id;
     const expectedSign = crypto
-      .createHmac('sha256', process.env.RAZORPAY_SECRET || 'your_razorpay_secret_key_here')
+      .createHmac('sha256', process.env.RAZORPAY_SECRET)
       .update(sign.toString())
       .digest('hex');
 

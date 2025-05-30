@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const auth = require('../middleware/auth');
-const Course = require('../models/Course');
-const Enrollment = require('../models/Enrollment');
-const User = require('../models/User');
+const Course = require('../models/Course.js');
+const Enrollment = require('../models/Enrollment.js');
+const User = require('../models/User.js');
 
 // Get instructor dashboard data
 router.get('/dashboard', auth, async (req, res) => {

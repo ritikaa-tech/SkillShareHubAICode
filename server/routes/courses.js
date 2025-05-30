@@ -3,11 +3,11 @@ const router = express.Router();
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
-const Course = require('../models/Course');
+const Course = require('../models/Course.js');
 const auth = require('../middleware/auth');
 const isAdmin = require('../middleware/isAdmin');
-const User = require('../models/User');
-const Enrollment = require('../models/Enrollment');
+const User = require('../models/User.js');
+const Enrollment = require('../models/Enrollment.js');
 const upload = require('../middleware/upload');
 
 // Configure multer for video uploads

@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const Course = require('../models/Course');
-const Enrollment = require('../models/Enrollment');
-const User = require('../models/User');
+const Course = require('../models/Course.js');
+const Enrollment = require('../models/Enrollment.js');
+const User = require('../models/User.js');
 const auth = require('../middleware/auth');
 const { createObjectCsvWriter } = require('csv-writer');
 const path = require('path');
