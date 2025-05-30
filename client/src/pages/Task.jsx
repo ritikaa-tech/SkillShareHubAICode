@@ -12,6 +12,7 @@ import {
 } from '@mui/material';
 import { useParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import VideoPlayer from '../components/VideoPlayer';
 
 const TaskPage = ({quizzes,  videos, resources, title, description }) => {
   const { id } = useParams(); // Course ID from route
@@ -46,16 +47,7 @@ const TaskPage = ({quizzes,  videos, resources, title, description }) => {
                  
                 <React.Fragment key={video._id}>
                     <ListItem alignItems="flex-start" sx={{ flexDirection: 'column', alignItems: 'start' }}>
-                    <Typography variant="subtitle1" gutterBottom>{video.title || 'Untitled'}</Typography>
-                    <iframe
-                        width="100%"
-                        height="315"
-                        src={video.url}
-                        title={video.title}
-                        frameBorder="0"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
-                    ></iframe>
+                    <VideoPlayer url={video.url} title={video.title} />
                     
                     </ListItem>
                     <Divider />

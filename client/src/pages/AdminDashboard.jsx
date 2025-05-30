@@ -1,15 +1,44 @@
 import React from 'react';
+import { Container, Typography, Box, Alert } from '@mui/material';
 import UserTable from '../components/admin/UserTable';
 import AdminStats from '../components/admin/AdminStats';
+import { useAuth } from '../context/AuthContext';
 
 const AdminDashboard = () => {
+  const { user } = useAuth();
+
+  if (!user || user.role !== 'admin') {
+    return (
+      <Container>
+        <Alert severity="error" sx={{ mt: 2 }}>
+          You do not have permission to access this page.
+        </Alert>
+      </Container>
+    );
+  }
+
   return (
-    <div className="p-6 space-y-8">
-      <h1 className="text-2xl font-bold">Admin Dashboard</h1>
-      <AdminStats />
-      <h2 className="text-xl font-semibold mt-8">Manage Users</h2>
-      <UserTable />
-    </div>
+    <Container maxWidth="lg" sx={{ py: 4 }}>
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h4" component="h1" gutterBottom>
+          Admin Dashboard
+        </Typography>
+        <Typography variant="subtitle1" color="text.secondary" gutterBottom>
+          Welcome back, {user.name}! Here's an overview of your platform.
+        </Typography>
+      </Box>
+
+      <Box sx={{ mb: 6 }}>
+        <AdminStats />
+      </Box>
+
+      <Box>
+        <Typography variant="h5" component="h2" gutterBottom>
+          Manage Users
+        </Typography>
+        <UserTable />
+      </Box>
+    </Container>
   );
 };
 

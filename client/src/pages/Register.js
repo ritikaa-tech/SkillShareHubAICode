@@ -38,12 +38,18 @@ function Register() {
     e.preventDefault();
 
     try {
-      const res = await fetch('https://skillsharehubbackend.onrender.com/api/users/register', {
+      const res = await fetch('/api/auth/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        credentials: 'include',
+        body: JSON.stringify({
+          username: formData.name,
+          email: formData.email,
+          password: formData.password,
+          role: formData.role
+        }),
       });
 
       const data = await res.json();
@@ -54,11 +60,22 @@ function Register() {
         setFormData({ name: '', email: '', password: '', role: 'user' });
         setTimeout(() => navigate('/login'), 2000);
       } else {
-        setError(data.message || 'Registration failed');
+        // Handle validation errors
+        if (data.errors && Array.isArray(data.errors)) {
+          const errorMessages = data.errors.map(err => err.msg).join(', ');
+          setError(errorMessages);
+        } else {
+          setError(data.message || 'Registration failed');
+        }
         setSuccess('');
       }
     } catch (err) {
-      setError('Something went wrong. Please try again later.');
+      console.error('Registration error:', err);
+      if (!navigator.onLine) {
+        setError('No internet connection. Please check your network and try again.');
+      } else {
+        setError('Unable to connect to the server. Please try again later.');
+      }
       setSuccess('');
     }
   };
@@ -109,6 +126,7 @@ function Register() {
               required
             >
               <MenuItem value="user">User</MenuItem>
+              <MenuItem value="instructor">Instructor</MenuItem>
               <MenuItem value="admin">Admin</MenuItem>
             </TextField>
             <Button variant="contained" color="primary" type="submit" fullWidth>

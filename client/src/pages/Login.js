@@ -15,11 +15,12 @@ function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('https://skillsharehubbackend.onrender.com/api/users/login', {
+      const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify({ email, password }),
       });
 
@@ -31,13 +32,17 @@ function Login() {
         login(data.user, data.token);
         navigate('/dashboard');
       } else {
-        setError(data.message || 'Login failed');
+        setError(data.message || 'Invalid email or password');
         setSuccess('');
       }
     } catch (err) {
-      setError('Server error, please try again later.');
+      console.error('Login error:', err);
+      if (!navigator.onLine) {
+        setError('No internet connection. Please check your network and try again.');
+      } else {
+        setError('Unable to connect to the server. Please try again later.');
+      }
       setSuccess('');
-      console.error(err);
     }
   };
 

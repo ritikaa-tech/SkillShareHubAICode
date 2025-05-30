@@ -1,14 +1,8 @@
 // src/pages/CourseDetail.js
 import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
-import isEqual from 'lodash.isequal';
-
-import Task from './Task';
-import CoursePage from './CoursePage';
-import ReviewForm from '../components/ReviewForm';
-// import ReviewsList from '../components/ReviewsList';
-import { useParams } from 'react-router-dom';
-
+import { useParams, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import {
   Container,
   Typography,
@@ -16,191 +10,190 @@ import {
   Button,
   Box,
   Divider,
+  Grid,
+  Paper,
+  CircularProgress,
+  Alert,
+  Rating,
 } from '@mui/material';
+import CourseRating from '../components/CourseRating';
 
 const CourseDetail = () => {
   const { id } = useParams();
-  const token = localStorage.getItem('token');
-  const user = JSON.parse(localStorage.getItem('user'));
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const [course, setCourse] = useState(null);
-  const [showTask, setShowTask] = useState(false);
-  const [video, setVideo] = useState({ title: '', url: '' });
-  const [resource, setResource] = useState({ name: '', link: '' });
-  const [quiz, setQuiz] = useState({ question: '', options: '', answer: '' });
-  const [reviews, setReviews] = useState([]);
-
-  // Axios helper with auth
-  const axiosAuth = axios.create({
-    baseURL: 'https://skillsharehubbackend.onrender.com/api',
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [userRating, setUserRating] = useState(null);
 
   useEffect(() => {
-    const fetchCourse = async () => {
-      try {
-        if (token) {
-          const res = await axiosAuth.get(`/courses/${id}`);
-          if (!course || !isEqual(course, res.data)) {
-            setCourse(res.data);
-          }
-        }
-      } catch (err) {
-        console.error('Error fetching course:', err);
-      }
-    };
-    fetchCourse();
-  }, [id, token]);
-
-  useEffect(() => {
-    const fetchReviews = async () => {
-      try {
-        const res = await axios.get(`https://skillsharehubbackend.onrender.com/api/reviews/${id}`);
-        setReviews(res.data);
-      } catch (err) {
-        console.error('Error fetching reviews:', err);
-      }
-    };
-    fetchReviews();
+    fetchCourseDetails();
   }, [id]);
 
-  const handleReviewSubmit = async () => {
+  const fetchCourseDetails = async () => {
     try {
-      const res = await axios.get(`https://skillsharehubbackend.onrender.com/api/reviews/${id}`);
-      setReviews(res.data);
-    } catch (err) {
-      console.error('Error refreshing reviews:', err);
-    }
-  };
+      setLoading(true);
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`http://localhost:5002/api/courses/${id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setCourse(response.data);
 
-  const handleAddField = async (field, data) => {
-    try {
-      switch (field) {
-        case 'videos':
-          if (!data.title || !data.url) {
-            alert('Please fill in all fields for video');
-            return;
-          }
-          break;
-        case 'resources':
-          if (!data.name || !data.link) {
-            alert('Please fill in all fields for resource');
-            return;
-          }
-          break;
-        case 'quizzes':
-          if (!data.question || !data.options || !data.answer) {
-            alert('Please fill in all fields for quiz');
-            return;
-          }
-          break;
-        default:
-          alert('Invalid field type');
-          return;
+      // Fetch user's rating if they're enrolled
+      if (user) {
+        const enrollmentResponse = await axios.get(`http://localhost:5002/api/enrollments/mine`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const userEnrollment = enrollmentResponse.data.find(e => e.course._id === id);
+        if (userEnrollment) {
+          setUserRating({
+            rating: userEnrollment.rating,
+            review: userEnrollment.review
+          });
+        }
       }
-
-      const updated = await axiosAuth.put(`/courses/${id}/${field}`, data);
-      setCourse(updated.data);
-
-      if (field === 'videos') setVideo({ title: '', url: '' });
-      if (field === 'resources') setResource({ name: '', link: '' });
-      if (field === 'quizzes') setQuiz({ question: '', options: '', answer: '' });
     } catch (err) {
-      console.error('Error adding field:', err.response?.data || err.message);
+      console.error('Error fetching course details:', err);
+      setError('Failed to fetch course details. Please try again later.');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const taskProps = useMemo(() => {
-    if (!course) return null;
-    return {
-      quizzes: course.quizzes,
-      videos: course.videos,
-      resources: course.resources,
-      title: course.title,
-      description: course.description,
-    };
-  }, [course]);
+  const handleEnroll = async () => {
+    if (!user) {
+      navigate('/login', { state: { from: `/courses/${id}` } });
+      return;
+    }
+    try {
+      const token = localStorage.getItem('token');
+      await axios.post(`http://localhost:5002/api/enrollments/${id}`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      navigate('/dashboard');
+    } catch (err) {
+      console.error('Error enrolling in course:', err);
+      setError(err.response?.data?.message || 'Failed to enroll in course. Please try again later.');
+    }
+  };
 
-  if (!course || !taskProps) return <Typography>Loading...</Typography>;
+  const handleRatingSubmit = (newRating) => {
+    setUserRating(newRating);
+    // Update course's average rating
+    setCourse(prev => ({
+      ...prev,
+      averageRating: ((prev.averageRating * prev.enrolledStudents.length) + newRating.rating) / 
+                    (prev.enrolledStudents.length + 1)
+    }));
+  };
+
+  if (loading) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Container>
+        <Alert severity="error" sx={{ mt: 2 }}>
+          {error}
+        </Alert>
+      </Container>
+    );
+  }
+
+  if (!course) {
+    return (
+      <Container>
+        <Alert severity="error" sx={{ mt: 2 }}>
+          Course not found
+        </Alert>
+      </Container>
+    );
+  }
+
+  const isEnrolled = user && course.enrolledStudents.some(student => student._id === user._id);
 
   return (
-    <Container>
-      <Typography variant="h4">{course.title}</Typography>
-      <Typography>{course.description}</Typography>
-
-      <Button onClick={() => setShowTask((prev) => !prev)} variant="contained" sx={{ mt: 1 }}>
-        Add Task
-      </Button>
-
-      {showTask && (
-        <>
-          {/* Add Video */}
-          <Box mt={4}>
-            <Typography variant="h6">Add Video</Typography>
-            <TextField label="Title" value={video.title} onChange={(e) => setVideo({ ...video, title: e.target.value })} fullWidth />
-            <TextField label="URL" value={video.url} onChange={(e) => setVideo({ ...video, url: e.target.value })} fullWidth />
-            <Button onClick={() => handleAddField('videos', video)} variant="contained" sx={{ mt: 1 }}>
-              Add Video
-            </Button>
+    <Container maxWidth="lg" sx={{ py: 4 }}>
+      <Grid container spacing={4}>
+        <Grid item xs={12} md={8}>
+          <Typography variant="h4" gutterBottom>
+            {course.title}
+          </Typography>
+          
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+            <Rating value={course.averageRating} readOnly precision={0.5} />
+            <Typography variant="body2" color="text.secondary" sx={{ ml: 1 }}>
+              ({course.enrolledStudents.length} students)
+            </Typography>
           </Box>
 
-          {/* Add Resource */}
-          <Box mt={4}>
-            <Typography variant="h6">Add Resource</Typography>
-            <TextField label="Name" value={resource.name} onChange={(e) => setResource({ ...resource, name: e.target.value })} fullWidth />
-            <TextField label="Link" value={resource.link} onChange={(e) => setResource({ ...resource, link: e.target.value })} fullWidth />
-            <Button onClick={() => handleAddField('resources', resource)} variant="contained" sx={{ mt: 1 }}>
-              Add Resource
-            </Button>
-          </Box>
+          <Typography variant="h6" gutterBottom>
+            About This Course
+          </Typography>
+          <Typography paragraph>
+            {course.description}
+          </Typography>
 
-          {/* Add Quiz */}
-          <Box mt={4}>
-            <Typography variant="h6">Add Quiz</Typography>
-            <TextField label="Question" value={quiz.question} onChange={(e) => setQuiz({ ...quiz, question: e.target.value })} fullWidth />
-            <TextField label="Options (comma-separated)" value={quiz.options} onChange={(e) => setQuiz({ ...quiz, options: e.target.value })} fullWidth />
-            <TextField label="Answer" value={quiz.answer} onChange={(e) => setQuiz({ ...quiz, answer: e.target.value })} fullWidth />
+          <Typography variant="h6" gutterBottom>
+            What You'll Learn
+          </Typography>
+          <Typography paragraph>
+            {course.learningObjectives}
+          </Typography>
+
+          {isEnrolled && (
+            <>
+              <Divider sx={{ my: 3 }} />
+              <Typography variant="h6" gutterBottom>
+                Your Rating
+              </Typography>
+              <CourseRating
+                courseId={course._id}
+                userRating={userRating}
+                onRatingSubmit={handleRatingSubmit}
+              />
+            </>
+          )}
+        </Grid>
+
+        <Grid item xs={12} md={4}>
+          <Paper sx={{ p: 3, position: 'sticky', top: 20 }}>
+            <Typography variant="h5" color="primary" gutterBottom>
+              ${course.price}
+            </Typography>
+
             <Button
-              onClick={() =>
-                handleAddField('quizzes', {
-                  question: quiz.question,
-                  options: quiz.options.split(',').map((o) => o.trim()),
-                  answer: quiz.answer,
-                })
-              }
               variant="contained"
-              sx={{ mt: 1 }}
+              color="primary"
+              fullWidth
+              size="large"
+              onClick={handleEnroll}
+              disabled={isEnrolled}
+              sx={{ mt: 2 }}
             >
-              Add Quiz
+              {isEnrolled ? 'Enrolled' : 'Enroll Now'}
             </Button>
-          </Box>
-        </>
-      )}
 
-      {/* Task Component */}
-      <Task {...taskProps} />
-
-      {/* Course Page (extra content) */}
-      <CoursePage />
-
-      {/* Reviews Section */}
-      <Box mt={4}>
-        <Typography variant="h5">Reviews</Typography>
-        <Divider sx={{ my: 2 }} />
-
-        {/* Review Form */}
-        {token && (
-          <ReviewForm
-            courseId={id}
-            userId={user?._id}
-            onReviewSubmit={handleReviewSubmit}
-          />
-        )}
-
-        {/* Reviews List */}
-        {/* <ReviewsList reviews={reviews} /> */}
-      </Box>
+            <Box sx={{ mt: 3 }}>
+              <Typography variant="subtitle1" gutterBottom>
+                This course includes:
+              </Typography>
+              <ul>
+                <li>Full lifetime access</li>
+                <li>Certificate of completion</li>
+                <li>Downloadable resources</li>
+                <li>Instructor support</li>
+              </ul>
+            </Box>
+          </Paper>
+        </Grid>
+      </Grid>
     </Container>
   );
 };

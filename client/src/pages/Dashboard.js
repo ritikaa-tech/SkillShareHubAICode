@@ -13,6 +13,8 @@ import {
   TextField,
 } from '@mui/material';
 import './Dashboard.css'; // ✅ Import custom styles
+import MakeAdmin from '../components/MakeAdmin';
+import CheckRole from '../components/CheckRole';
 
 const Dashboard = () => {
   const { token } = useAuth();
@@ -33,7 +35,7 @@ const Dashboard = () => {
 
   const fetchCourses = async () => {
     try {
-      const res = await axios.get('https://skillsharehubbackend.onrender.com/api/courses', {
+      const res = await axios.get('http://localhost:5002/api/courses', {
         headers: { Authorization: `Bearer ${token}` },
       });
       setCourses(res.data);
@@ -68,7 +70,7 @@ const Dashboard = () => {
   const handleDeleteClick = async (e, id) => {
     e.stopPropagation();
     try {
-      await axios.delete(`https://skillsharehubbackend.onrender.com/api/courses/${id}`, {
+      await axios.delete(`http://localhost:5002/api/courses/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       fetchCourses();
@@ -95,11 +97,11 @@ const Dashboard = () => {
 
     try {
       if (editingCourseId) {
-        await axios.put(`https://skillsharehubbackend.onrender.com/api/courses/${editingCourseId}`, courseData, {
+        await axios.put(`http://localhost:5002/api/courses/${editingCourseId}`, courseData, {
           headers: { Authorization: `Bearer ${token}` },
         });
       } else {
-        await axios.post('https://skillsharehubbackend.onrender.com/api/courses', courseData, {
+        await axios.post('http://localhost:5002/api/courses', courseData, {
           headers: { Authorization: `Bearer ${token}` },
         });
       }
@@ -118,23 +120,28 @@ const Dashboard = () => {
     }
   };
 
-  const handlePayment = async (e) => {
+  const handlePayment = async (e, courseData) => {
     e.stopPropagation();
     const options = {
       key: "rzp_test_I32MxpVUddAgQo",
       amount: 50000,
       currency: "INR",
-      name: "Your Company Name",
-      description: "Test Transaction",
+      name: "SkillShareHub",
+      description: "Course Purchase",
       image: "https://your-logo-url.com/logo.png",
       order_id: "",
       handler: async function (response) {
-        const data = await axios.post('https://skillsharehubbackend.onrender.com/api/payment/verify', {
-          razorpay_order_id: response.razorpay_order_id,
-          razorpay_payment_id: response.razorpay_payment_id,
-          razorpay_signature: response.razorpay_signature,
-        });
-        alert(`Payment successful! Payment ID: ${response.razorpay_payment_id}`);
+        try {
+          const data = await axios.post('http://localhost:5002/api/payment/verify', {
+            razorpay_order_id: response.razorpay_order_id,
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_signature: response.razorpay_signature,
+          });
+          alert(`Payment successful! Payment ID: ${response.razorpay_payment_id}`);
+        } catch (error) {
+          console.error('Payment verification failed:', error);
+          alert('Payment verification failed. Please contact support.');
+        }
       },
       prefill: {
         name: "Ritika Singh",
@@ -149,14 +156,35 @@ const Dashboard = () => {
       },
     };
 
-    const razorpay = new window.Razorpay(options);
-    razorpay.open();
+    try {
+      // Create order first
+      const orderResponse = await axios.post('http://localhost:5002/api/payment/create-order', {
+        amount: 500,
+        userId: localStorage.getItem('userId'), // Get userId from localStorage
+        courseId: courseData._id // Use the courseData passed as parameter
+      });
+
+      if (orderResponse.data.success) {
+        options.order_id = orderResponse.data.order.id;
+        const razorpay = new window.Razorpay(options);
+        razorpay.open();
+      } else {
+        alert('Failed to create order. Please try again.');
+      }
+    } catch (error) {
+      console.error('Order creation failed:', error);
+      alert('Failed to create order. Please try again.');
+    }
   };
 
   return (
     <Container maxWidth="lg" className="dashboard-container">
       <Box>
         <Typography variant="h4" gutterBottom>Dashboard</Typography>
+        
+        <CheckRole />
+        
+        <MakeAdmin />
 
         <Box sx={{ mt: 4 }}>
           <Typography variant="h5" gutterBottom>My Courses</Typography>
@@ -202,7 +230,7 @@ const Dashboard = () => {
                         <Button
                           variant="outlined"
                           size="small"
-                          onClick={handlePayment}
+                          onClick={(e) => handlePayment(e, course)}
                         >
                           Buy Course
                         </Button>

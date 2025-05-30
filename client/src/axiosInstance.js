@@ -2,7 +2,10 @@
 import axios from 'axios';
 
 const axiosInstance = axios.create({
-  baseURL: 'https://skillsharehubbackend.onrender.com/api',
+  baseURL: 'http://localhost:5002/api',
+  headers: {
+    'Content-Type': 'application/json',
+  },
 });
 
 axiosInstance.interceptors.request.use(

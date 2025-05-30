@@ -5,7 +5,7 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
-  const [loading, setLoading] = useState(true); // Add loading state
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
@@ -17,17 +17,36 @@ export const AuthProvider = ({ children }) => {
         setToken(storedToken);
       } catch (e) {
         console.error("Failed to parse stored user:", e);
+        // Clear invalid data
+        localStorage.removeItem('user');
+        localStorage.removeItem('token');
       }
     }
 
-    setLoading(false); // ✅ We're done restoring from localStorage
+    setLoading(false);
   }, []);
 
-  const login = (userData, token) => {
-    setUser(userData);
-    setToken(token);
-    localStorage.setItem('user', JSON.stringify(userData));
-    localStorage.setItem('token', token);
+  const login = (userData, authToken) => {
+    if (!userData || !authToken) {
+      console.error('Invalid login data:', { userData, authToken });
+      return;
+    }
+
+    try {
+      // Store user data and token
+      setUser(userData);
+      setToken(authToken);
+      localStorage.setItem('user', JSON.stringify(userData));
+      localStorage.setItem('token', authToken);
+    } catch (error) {
+      console.error('Error during login:', error);
+      // Clear any partial data
+      setUser(null);
+      setToken(null);
+      localStorage.removeItem('user');
+      localStorage.removeItem('token');
+      throw new Error('Failed to complete login');
+    }
   };
 
   const logout = () => {
@@ -37,11 +56,26 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('token');
   };
 
+  const value = {
+    user,
+    token,
+    login,
+    logout,
+    loading,
+    isAuthenticated: !!token
+  };
+
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, loading }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-export const useAuth = () => useContext(AuthContext); 
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+}; 

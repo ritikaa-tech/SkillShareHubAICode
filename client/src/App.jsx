@@ -19,10 +19,10 @@ function App() {
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<CourseList />} />
-          <Route path="/courses" element={<CourseList />} />
-          <Route path="/courses/:id" element={<CourseDetail />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/courses" element={<CourseList />} />
+          <Route path="/courses/:id" element={<CourseDetail />} />
 
           {/* Protected Routes */}
           <Route
@@ -56,4 +56,4 @@ function App() {
   );
 }
 
-export default App;
+export default App; 

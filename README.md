@@ -1,69 +1,134 @@
-# SkillshareHub
+# SkillShareHub
 
-A MERN stack application for sharing and learning skills.
+A platform for sharing and learning skills through online courses.
+
+## Features
+
+- User authentication and authorization
+- Course creation and management
+- Course enrollment with payment integration
+- Course rating and review system
+- Progress tracking
+- Instructor dashboard
+- Student dashboard
+- Payment processing with Razorpay
+
+## Tech Stack
+
+- Frontend: React.js, Material-UI
+- Backend: Node.js, Express.js
+- Database: MongoDB
+- Payment: Razorpay
+- Authentication: JWT
+
+## Prerequisites
+
+- Node.js (v14 or higher)
+- MongoDB
+- Razorpay account
+
+## Setup Instructions
+
+1. Clone the repository:
+```bash
+git clone https://github.com/yourusername/SkillShareHub.git
+cd SkillShareHub
+```
+
+2. Install dependencies:
+```bash
+# Install server dependencies
+cd server
+npm install
+
+# Install client dependencies
+cd ../client
+npm install
+```
+
+3. Create environment files:
+
+Create `.env` in the server directory:
+```
+PORT=5002
+MONGODB_URI=your_mongodb_uri
+JWT_SECRET=your_jwt_secret
+RAZORPAY_KEY_ID=your_razorpay_key_id
+RAZORPAY_SECRET=your_razorpay_secret
+```
+
+4. Start the development servers:
+
+```bash
+# Start server (from server directory)
+npm run dev
+
+# Start client (from client directory)
+npm start
+```
+
+The application will be available at:
+- Frontend: http://localhost:3000
+- Backend: http://localhost:5002
 
 ## Project Structure
 
 ```
-skillsharehub/
-├── client/                 # React frontend
+SkillShareHub/
+├── client/                 # Frontend React application
 │   ├── public/            # Static files
 │   └── src/               # React source files
-└── server/                # Node.js backend
-    ├── config/            # Configuration files
-    ├── controllers/       # Route controllers
-    ├── models/           # Database models
-    ├── routes/           # API routes
-    └── middleware/       # Custom middleware
+│       ├── components/    # Reusable components
+│       ├── context/       # React context
+│       ├── pages/         # Page components
+│       └── utils/         # Utility functions
+├── server/                # Backend Node.js application
+│   ├── config/           # Configuration files
+│   ├── middleware/       # Custom middleware
+│   ├── models/           # Mongoose models
+│   ├── routes/           # API routes
+│   └── utils/            # Utility functions
+└── uploads/              # Uploaded files
+    ├── videos/           # Course videos
+    └── resources/        # Course resources
 ```
 
-## Setup Instructions
+## API Documentation
 
-### Prerequisites
-- Node.js (v14 or higher)
-- MongoDB
-- npm or yarn
+### Authentication
+- POST /api/auth/register - Register a new user
+- POST /api/auth/login - Login user
+- GET /api/auth/me - Get current user
 
-### Backend Setup
-1. Navigate to the server directory:
-   ```bash
-   cd server
-   ```
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Create a .env file and add your environment variables
-4. Start the server:
-   ```bash
-   npm run dev
-   ```
+### Courses
+- GET /api/courses - Get all courses
+- POST /api/courses - Create a new course
+- GET /api/courses/:id - Get course by ID
+- PUT /api/courses/:id - Update course
+- DELETE /api/courses/:id - Delete course
 
-### Frontend Setup
-1. Navigate to the client directory:
-   ```bash
-   cd client
-   ```
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Start the development server:
-   ```bash
-   npm start
-   ```
+### Enrollments
+- POST /api/enrollments/:courseId - Enroll in a course
+- GET /api/enrollments/mine - Get user's enrollments
+- PUT /api/enrollments/:id/progress - Update course progress
 
-## Environment Variables
+### Payments
+- POST /api/payments/create-order - Create payment order
+- POST /api/payments/verify - Verify payment
 
-Create a `.env` file in the server directory with the following variables:
-```
-PORT=5000
-MONGODB_URI=mongodb://localhost:27017/skillsharehub
-JWT_SECRET=your_jwt_secret_key_here
-NODE_ENV=development
-```
+## Contributing
 
-## Available Scripts
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-### Backend
-- `
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Contact
+
+Your Name - your.email@example.com
+Project Link: https://github.com/yourusername/SkillShareHub
