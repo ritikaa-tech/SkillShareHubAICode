@@ -25,7 +25,7 @@ const UserTable = () => {
         console.error('Error decoding token:', e);
       }
 
-      const res = await axios.get('http://localhost:5002/api/admin/users', {
+      const res = await axios.get('https://skillsharehubaicodebackend.onrender.com/api/admin/users', {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -56,7 +56,7 @@ const UserTable = () => {
         throw new Error('No authentication token found');
       }
 
-      await axios.patch(`http://localhost:5002/api/admin/users/${id}/block`, {}, {
+      await axios.patch(`https://skillsharehubaicodebackend.onrender.com/api/admin/users/${id}/block`, {}, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -75,7 +75,7 @@ const UserTable = () => {
         throw new Error('No authentication token found');
       }
 
-      await axios.delete(`http://localhost:5002/api/admin/users/${id}`, {
+      await axios.delete(`https://skillsharehubaicodebackend.onrender.com/api/admin/users/${id}`, {
         headers: {
           Authorization: `Bearer ${token}`
         }

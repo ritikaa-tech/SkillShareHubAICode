@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 const axiosInstance = axios.create({
-  baseURL: 'http://localhost:5002/api',
+  baseURL: 'https://skillsharehubaicodebackend.onrender.com/api',
   headers: {
     'Content-Type': 'application/json',
   },
